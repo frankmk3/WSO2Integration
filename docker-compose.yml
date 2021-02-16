@@ -1,82 +1,22 @@
 
 version: '3.8'
 
-services: 
-  sercop-email-master:
-    depends_on: [ "db"]
-    build: dockercompose/sercop-email-master
-    environment:
-       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/microservicios
+services:
+
+
+  wso2integration:
+    depends_on: [ "wso2ei"]
+    build: dockercompose/wso2integration
     ports:
-     - "9093:9093"
+      - "8080:8080"
     volumes:
-     - ./dockercompose/sercop-email-master/app.jar:/home/app.jar
+      - ./dockercompose/wso2integration/app.jar:/home/app.jar
 
-  sercop-registro-proveedor-master:
-    depends_on: [ "db"]
-    build: dockercompose/sercop-registro-proveedor-master
-    environment:
-       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/microservicios
-       SECURITY_VERIFICATION_URL: https://wso2ei:9443/oauth2/introspect
-
-    ports:
-     - "9094:9094"
-    volumes:
-     - ./dockercompose/sercop-registro-proveedor-master/app.jar:/home/app.jar
-
-
-  sercop-seguridad-master:
-    depends_on: [ "db"]
-    build: dockercompose/sercop-seguridad-master
-    environment:
-       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/microservicios
-       SECURITY_VERIFICATION_URL: https://wso2ei:9443/oauth2/introspect
-       SECURITY_CREATION_URL: https://wso2ei:9443/scim2/Users
-       LOGGING_LEVEL_ROOT: INFO
-       LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_WEB: INFO
-
-       SPRING_JPA_HIBERNATE_DDL-AUTO: update
-       JAVAX_PERSISTENCE_SCHEMA-GENERATION_CREATE-SOURCE: seguridad
-
-    ports:
-     - "9091:9091"
-    volumes:
-     - ./dockercompose/sercop-seguridad-master/app.jar:/home/app.jar
-
-
-  nginx:
-     build: dockercompose/nginx
-     ports:
-       - "3000:80"
-     volumes:
-     - ./dockercompose/nginx/var/www/html:/var/www/html
-     - ./dockercompose/nginx/etc/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf
-     environment:
-      REACT_APP_API_BASE_URL: http://localhost:1888/v1/dept-video
-
-  email:
-     image: namshi/smtp
-     ports:
-       - "125:25"
-     environment:
-       DISABLE_IPV6: "true"
-
-
-  db:
-    image: postgres:latest
-    restart: on-failure
-    ports:
-      - "5432:5432"
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: microservicios
 
   wso2ei:
-    image: wso2/wso2is
+    image: wso2/wso2is:5.10.0
     ports:
       - 9443:9443
-    
     healthcheck:
       test: ["CMD-SHELL", "curl -k -f https://localhost:9443/carbon/admin/login.jsp"]
       interval: 5s
@@ -86,12 +26,3 @@ services:
     volumes:
       - ./dockercompose/cert/wso2ei.jks:/home/wso2carbon/wso2is-5.10.0/repository/resources/security/wso2ei.jks
       - ./dockercompose/wso2ei/conf/deployment.toml:/home/wso2carbon/wso2is-5.10.0/repository/conf/deployment.toml
-      #- ./dockercompose/wso2ei/data/server:/home/wso2carbon/wso2is-5.10.0/repository/deployment/server
-      #- ./dockercompose/wso2ei/db:/home/wso2carbon/wso2is-5.10.0/repository/database
-      # mountPath: /opt/wso2is/repository/resources/security
-      # - mountPath: /opt/wso2is/repository/data
-      #    name: pvc-data
-      #  - mountPath: /opt/wso2is/repository/database
-      #    name: pvc-db
-      #    /home/wso2carbon/wso2is-5.10.0/repository/conf/carbon.xml
-

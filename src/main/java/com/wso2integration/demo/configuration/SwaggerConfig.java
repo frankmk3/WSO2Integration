@@ -32,7 +32,7 @@ public class SwaggerConfig {
                 .licenseUrl("http://www.apache.org/licenses/LICENSE-2.0.html")
                 .termsOfServiceUrl("")
                 .version("1.0.0")
-                .contact(new Contact("", "", "contact@sercop.gob.ec"))
+                .contact(new Contact("", "", "contact@wso2.demo.com"))
                 .build();
     }
 
